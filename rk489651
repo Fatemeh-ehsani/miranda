@@ -1,1 +1,182 @@
-vless://eba25684-483a-452b-88eb-2c648bc80981@0.0.0.0:443?encryption=none&security=tls&sni=812D2ee4-baYAt.BugSAndsUGgEstiOns.wORkeRS.dEv&alpn=h2%2Chttp%2F1.1&fp=randomized&type=ws&host=812d2ee4-bayat.bugsandsuggestions.workers.dev&path=%2FmVEG8MfVydTqeCRP%3Fed%3D2560#.
+{
+  "log": {
+    "access": "",
+    "error": "",
+    "loglevel": "none",
+    "dnsLog": false
+  },
+  "dns": {
+    "tag": "dns",
+    "hosts": {
+      "dns.dynx.pro": [
+        "190.93.247.56"        
+      ]
+    },
+    "servers": [
+      "https://dns.dynx.pro/dns-query"
+    ]
+  },
+  "inbounds": [
+    {
+      "domainOverride": [
+        "http",
+        "tls"
+      ],
+      "protocol": "socks",
+      "tag": "socks-in",
+      "listen": "127.0.0.1",
+      "port": 10808,
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "userLevel": 8
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+    {
+      "protocol": "http",
+      "tag": "http-in",
+      "listen": "127.0.0.1",
+      "port": 10809,
+      "settings": {
+        "userLevel": 8
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "fragment-out",
+      "domainStrategy": "UseIP",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "settings": {
+        "fragment": {
+          "packets": "tlshello",
+          "length": "10-20",
+          "interval": "10-20"
+        }
+      },
+      "streamSettings": {
+        "sockopt": {
+          "tcpNoDelay": true,
+          "tcpKeepAliveIdle": 100,
+          "mark": 255,
+          "domainStrategy": "UseIP"
+        }
+      }
+    },
+    {
+      "protocol": "dns",
+      "tag": "dns-out"
+    },
+    {
+      "protocol": "vless",
+      "tag": "fakeproxy-out",
+      "domainStrategy": "",
+      "settings": {
+        "vnext": [
+          {
+            "address": "google.com",
+            "port": 443,
+            "users": [
+              {
+                "encryption": "none",
+                "flow": "",
+                "id": "UUID",
+                "level": 8,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "allowInsecure": true,
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ],
+          "fingerprint": "chrome",
+          "publicKey": "",
+          "serverName": "google.com",
+          "shortId": "",
+          "show": false,
+          "spiderX": ""
+        },
+        "wsSettings": {
+          "headers": {
+            "Host": "google.com"
+          },
+          "path": "/?ed=2560"
+        }
+      },
+      "mux": {
+        "concurrency": 8,
+        "enabled": true
+      }
+    }
+  ],
+  "policy": {
+    "levels": {
+      "8": {
+        "connIdle": 300,
+        "downlinkOnly": 1,
+        "handshake": 4,
+        "uplinkOnly": 1
+      }
+    },
+    "system": {
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  },
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "inboundTag": [
+          "socks-in",
+          "http-in"
+        ],
+        "type": "field",
+        "port": "53",
+        "outboundTag": "dns-out",
+        "enabled": true
+      },
+      {
+        "inboundTag": [
+          "socks-in",
+          "http-in"
+        ],
+        "type": "field",
+        "port": "0-65535",
+        "outboundTag": "fragment-out",
+        "enabled": true
+      }
+    ],
+    "strategy": "rules"
+  },
+  "stats": {}
+}
